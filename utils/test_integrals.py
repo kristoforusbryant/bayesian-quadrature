@@ -36,3 +36,23 @@ genz = {1: genz1,
         4: genz4,
         5: genz5,
         6: genz6}
+
+default_a = {1: lambda d: 150/np.power(d,3),
+             2: lambda d: 600/np.power(d,3), 
+             3: lambda d: 10/np.power(d,3), 
+             4: lambda d: 100/np.power(d,2), 
+             5: lambda d: 110/np.power(d, 5/2), 
+             6: lambda d: 600/np.power(d,3), 
+             7: lambda d: 0}
+
+class IntegralFunctions: 
+    def __init__(self, d: int, u=None, a=None):
+        self.d = d 
+        self.u = np.array([.5 for _ in range(d)]) if not u else u  
+        self.a_i = np.array([default_a[i](d) for i in range(1,8)]) if not a else a
+        self.list = genz 
+        self.list[7] = step
+        
+    def __call__(self, x: np.ndarray, i: int): 
+        a = np.array([self.a_i[i-1] for _ in range(self.d)])
+        return self.list[i](a,u,x)
