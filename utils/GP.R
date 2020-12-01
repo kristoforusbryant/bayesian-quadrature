@@ -62,14 +62,14 @@ GP <- setRefClass("GP",
         y <<- c(y, y_new)
         C_N <<- k_mult(X_new, X_new, kernel) + sigmasq * diag(nrow(X_new))
         if (all(dim(X_new) == 1)){C_N_inv <<- 1/C_N}
-        else{C_N_inv <<- inv(C_N)}
+        else{C_N_inv <<- solve(C_N)}
       }
       else{
         k = k_mult(X, X_new, kernel)
         c = k_mult(X_new,X_new, kernel) + sigmasq * diag(nrow(X_new))
         C_N <<- cbind(C_N, k) 
         C_N <<- rbind(C_N, cbind(t(k), c)) 
-        C_N_inv <<- inv(C_N)
+        C_N_inv <<- solve(C_N)
         X <<- rbind(X, X_new) 
         y <<- c(y, y_new)  
       }
@@ -91,18 +91,6 @@ GP <- setRefClass("GP",
     }
     )
 )
-
-GP_obj <- GP$new(d = 3, kernel=kernel_Matern, sigmasq = 2)
-
-GP_obj$seq_update(M, 1:nrow(M))
-
-GP_obj$C_N
-GP_obj$C_N_inv
-GP_obj$mean(a)
-GP_obj$cov(a)
-GP_obj$kernel_mean_MI(MI_iter = 100)
-GP_obj$full_kernel_integral_MI(MI_iter = 100)
-GP_obj$GP_BQ(MI_iter = 100)
 
 
 
