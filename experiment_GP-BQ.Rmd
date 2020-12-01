@@ -1,0 +1,205 @@
+---
+title: "Test GP-BQ"
+output: html_notebook
+---
+```{r}
+source('utils/GP.R')
+source('utils/genz_functions.r')
+```
+
+# HYPERPARAMETERS
+```{r}
+d = 10
+N = 50*d 
+x = matrix(runif(N * d), ncol = d) # N samples of d dimensions
+u = rep(.5, d)
+MI_iter = 1e4
+sigmasq = .2
+
+results = list()
+```
+
+# GENZ 1
+```{r}
+a = rep(150/(d^3), d)
+y = apply(x, 1, function(x_){genz1(a, x_, u)}) 
+
+GP_obj <- GP$new(d = d, kernel=kernel_Matern, sigmasq = sigmasq)
+ptm <- proc.time()
+GP_obj$seq_update(as.matrix(x), as.matrix(y))
+print('GP Posterior inference ... ')
+print(proc.time() - ptm)
+
+if (d == 1){
+  testpoints = matrix(runif(N*d), ncol = d)
+  plot(x, y, col='blue')
+  points(testpoints, apply(testpoints, 1, GP_obj$mean), col='red')
+}
+
+ptm <- proc.time()
+results[[1]] = GP_obj$GP_BQ(MI_iter = MI_iter)
+print(results[[1]])
+print('GP-BQ inference ... ')
+print(proc.time() - ptm)
+```
+
+
+# GENZ 2
+```{r}
+a = rep(600/(d^3), d)
+y = apply(x, 1, function(x_){genz2(a, x_, u)}) 
+
+GP_obj <- GP$new(d = d, kernel=kernel_Matern, sigmasq = sigmasq)
+ptm <- proc.time()
+GP_obj$seq_update(as.matrix(x), as.matrix(y))
+print('GP Posterior inference ... ')
+print(proc.time() - ptm)
+
+if (d == 1){
+  testpoints = matrix(runif(N*d), ncol = d)
+  plot(x, y, col='blue')
+  points(testpoints, apply(testpoints, 1, GP_obj$mean), col='red')
+}
+
+ptm <- proc.time()
+results[[2]] = GP_obj$GP_BQ(MI_iter = MI_iter)
+print(results[[2]])
+print('GP-BQ inference ... ')
+print(proc.time() - ptm)
+```
+
+# GENZ 3
+```{r}
+a = rep(10/(d^3), d)
+y = apply(x, 1, function(x_){genz3(a, x_, u)}) 
+
+GP_obj <- GP$new(d = d, kernel=kernel_Matern, sigmasq = sigmasq)
+ptm <- proc.time()
+GP_obj$seq_update(as.matrix(x), as.matrix(y))
+print('GP Posterior inference ... ')
+print(proc.time() - ptm)
+
+if (d == 1){
+  testpoints = matrix(runif(N*d), ncol = d)
+  plot(x, y, col='blue')
+  points(testpoints, apply(testpoints, 1, GP_obj$mean), col='red')
+}
+
+ptm <- proc.time()
+results[[3]] = GP_obj$GP_BQ(MI_iter = MI_iter)
+print(results[[3]])
+print('GP-BQ inference ... ')
+print(proc.time() - ptm)
+```
+
+
+# GENZ 4
+```{r}
+a = rep(100/(d^2), d)
+y = apply(x, 1, function(x_){genz4(a, x_, u)}) 
+
+GP_obj <- GP$new(d = d, kernel=kernel_Matern, sigmasq = sigmasq)
+ptm <- proc.time()
+GP_obj$seq_update(as.matrix(x), as.matrix(y))
+print('GP Posterior inference ... ')
+print(proc.time() - ptm)
+
+if (d == 1){
+  testpoints = matrix(runif(N*d), ncol = d)
+  plot(x, y, col='blue')
+  points(testpoints, apply(testpoints, 1, GP_obj$mean), col='red')
+}
+
+ptm <- proc.time()
+results[[4]] = GP_obj$GP_BQ(MI_iter = MI_iter)
+print(results[[4]])
+print('GP-BQ inference ... ')
+print(proc.time() - ptm)
+```
+
+# GENZ 5
+```{r}
+a = rep(110/(d^(5/2)), d)
+y = apply(x, 1, function(x_){genz5(a, x_, u)}) 
+
+GP_obj <- GP$new(d = d, kernel=kernel_Matern, sigmasq = sigmasq)
+ptm <- proc.time()
+GP_obj$seq_update(as.matrix(x), as.matrix(y))
+print('GP Posterior inference ... ')
+print(proc.time() - ptm)
+
+if (d == 1){
+  testpoints = matrix(runif(N*d), ncol = d)
+  plot(x, y, col='blue')
+  points(testpoints, apply(testpoints, 1, GP_obj$mean), col='red')
+}
+
+ptm <- proc.time()
+results[[5]] = GP_obj$GP_BQ(MI_iter = MI_iter)
+print(results[[5]])
+print('GP-BQ inference ... ')
+print(proc.time() - ptm)
+```
+
+
+# GENZ 6
+```{r}
+a = rep(600/(d^3), d)
+y = apply(x, 1, function(x_){genz6(a, x_, u)}) 
+
+GP_obj <- GP$new(d = d, kernel=kernel_Matern, sigmasq = sigmasq)
+ptm <- proc.time()
+GP_obj$seq_update(as.matrix(x), as.matrix(y))
+print('GP Posterior inference ... ')
+print(proc.time() - ptm)
+
+if (d == 1){
+  testpoints = matrix(runif(N*d), ncol = d)
+  plot(x, y, col='blue')
+  points(testpoints, apply(testpoints, 1, GP_obj$mean), col='red')
+}
+
+ptm <- proc.time()
+results[[6]] = GP_obj$GP_BQ(MI_iter = MI_iter)
+print(results[[6]])
+print('GP-BQ inference ... ')
+print(proc.time() - ptm)
+```
+
+# GENZ 7
+```{r}
+a = rep(100/(d^2), d)
+y = apply(x, 1, function(x_){step(a, x_, u)}) 
+
+GP_obj <- GP$new(d = d, kernel=kernel_Matern, sigmasq = sigmasq)
+ptm <- proc.time()
+GP_obj$seq_update(as.matrix(x), as.matrix(y))
+print('GP Posterior inference ... ')
+print(proc.time() - ptm)
+
+if (d == 1){
+  testpoints = matrix(runif(N*d), ncol = d)
+  plot(x, y, col='blue')
+  points(testpoints, apply(testpoints, 1, GP_obj$mean), col='red')
+}
+
+ptm <- proc.time()
+results[[7]] = GP_obj$GP_BQ(MI_iter = MI_iter)
+print(results[[7]])
+print('GP-BQ inference ... ')
+print(proc.time() - ptm)
+```
+
+# SAVE RESULTS
+```{r}
+filename = paste(c("results/Experiment_D", d,
+                         "_N",N,".RData"), collapse="")
+save(results, file = filename)
+```
+
+
+
+
+
+
+
