@@ -1,10 +1,14 @@
 library(matlib)
-rho = 3
+rho = .1
 # Kernels
-l2_norm <- function(x){ sum(x * x)}
+l2_norm <- function(x){ sqrt(sum(x * x))}
 kernel_Matern <- function(x,y){
   return((1 + (sqrt(3) * l2_norm(x - y) / rho)) * exp(-(sqrt(3) * l2_norm(x - y) / rho)))
 }
+kernel_rbf <- function(x,y, l=1){
+  return(exp(- (l2_norm(x - y))/ (2*l*l)))
+}
+
 kernel_add <- function(x,y){sum(x+y)} # trivial for testing
 
 
@@ -27,7 +31,7 @@ k_mult = function(X, X_, kernel){
   K = apply(X_, 1, function(a){apply(X, 1, function(b){kernel(a,b)})})
   return(t(as.matrix(K)))
 }
-
+# bug here, (M, a) and (a, M) both returns 1 x m matrices 
 
 # GP 
 GP <- setRefClass("GP", 
@@ -47,7 +51,7 @@ GP <- setRefClass("GP",
       .self$kernel = kernel
       .self$sigmasq = sigmasq
     },
-    mean = function(x){k_mult(x, X, kernel) %*% C_N_inv %*% y},
+    mean = function(x){k_mult(x, X, kernel) %*% C_N_inv %*% as.matrix(y)},
     cov = function(x){ 
       k = k_mult(x, X, kernel)
       return(as.numeric(kernel(x,x) + sigmasq - k %*% C_N_inv %*% t(k)))
@@ -57,7 +61,8 @@ GP <- setRefClass("GP",
         X <<- rbind(X, X_new) 
         y <<- c(y, y_new)
         C_N <<- k_mult(X_new, X_new, kernel) + sigmasq * diag(nrow(X_new))
-        C_N_inv <<- inv(C_N)
+        if (all(dim(X_new) == 1)){C_N_inv <<- 1/C_N}
+        else{C_N_inv <<- inv(C_N)}
       }
       else{
         k = k_mult(X, X_new, kernel)
@@ -80,14 +85,24 @@ GP <- setRefClass("GP",
       integral = list()
       k_mean = t(as.matrix(kernel_mean_MI(MI_iter=MI_iter, min=0, max=1)))
       full_k_int = full_kernel_integral_MI(MI_iter=MI_iter, min=0, max=1)
-      integral$E = as.numeric(k_mean %*% C_N_inv %*% y)
+      integral$E = as.numeric(k_mean %*% C_N_inv %*% as.matrix(y))
       integral$V = full_k_int - as.numeric(k_mean %*% C_N_inv %*% t(k_mean))
       return(integral)
     }
     )
 )
 
+GP_obj <- GP$new(d = 3, kernel=kernel_Matern, sigmasq = 2)
 
+GP_obj$seq_update(M, 1:nrow(M))
+
+GP_obj$C_N
+GP_obj$C_N_inv
+GP_obj$mean(a)
+GP_obj$cov(a)
+GP_obj$kernel_mean_MI(MI_iter = 100)
+GP_obj$full_kernel_integral_MI(MI_iter = 100)
+GP_obj$GP_BQ(MI_iter = 100)
 
 
 
