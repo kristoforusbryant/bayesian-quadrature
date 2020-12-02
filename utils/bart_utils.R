@@ -1,6 +1,7 @@
 library("dbarts")
 
 #'@param integral_function one of the genz functions to compute the integrand
+#'@param a parameter 'a' characterising the integrand function
 #'@param x_train Nxd matrix specifying the x data, where N is the number of datapoints and d is the dimension of the data
 #'@param y_train Nx1 vector specifying the y data
 #'@param n_total integer specifying the total number of meshpoints to approximate the integral.
@@ -10,7 +11,7 @@ library("dbarts")
 #'@param seed integer specifying the seed to ensure reproducibility of results
 
 
-bart_sequential_fitting <- function(integral_function, x_train, y_train, n_total, n_tree, S = 10000, d, seed){
+bart_sequential_fitting <- function(integral_function, a, x_train, y_train, n_total, n_tree, S = 10000, d, seed){
   
   # compute number of additional meshpoints required
   nseq <- n_total- length(y_train) 
@@ -33,7 +34,7 @@ bart_sequential_fitting <- function(integral_function, x_train, y_train, n_total
     
     #evaluate y_star
     epsilon_star <- rnorm(1, mean=0, sd = mean(fit_result$sigma))
-    y_star <- integral_function(rep((150/(d^3)), d), c_star, rep(0.5, d)) + epsilon_star
+    y_star <- integral_function(rep(a, d), c_star, rep(0.5, d)) + epsilon_star
     
     
     x_train <- rbind(x_train, c_star)
