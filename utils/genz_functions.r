@@ -17,7 +17,7 @@ genz1 <- function(a, x, u){
 }
 
 genz1_int <- function(a, u){
-  return(prod((1/a) * 2-exp(-a*u) - exp(a*(u-1))))
+  return(prod((1/a) * (2-exp(-a*u) - exp(a*(u-1)))))
 }
 
 ### corner peak function ###
@@ -71,7 +71,7 @@ genz4 <- function(a, x, u){
 
 genz4_int <- function(a, u){
   d <- length(a)
-  return(pi**(d/2) * prod((1/a) *pnorm(sqrt(2) *a*(1-u) - pnorm(-sqrt(2)*a*u))))
+  return(pi**(d/2) * prod((1/a) *(pnorm(sqrt(2) *a*(1-u) - pnorm(-sqrt(2)*a*u)))))
 }
 
 
