@@ -16,34 +16,31 @@ genz1 <- function(a, x, u){
   return(exp(-sum(a*sqrt((x-u)**2))))
 }
 
-
-genz2 <- function(a, x, u){
-  d <- length(x)
-  return((1 + sum(a*x))**(-(d+1)))
-
 genz1_int <- function(a, u){
   return(prod((1/a) * 2-exp(-a*u) - exp(a*(u-1))))
 }
 
-
 ### corner peak function ###
-
+genz2 <- function(a, x, u){
+  d <- length(x)
+  return((1 + sum(a*x))**(-(d+1)))
 }
 
-genz2_int <- function(a){
-  d <- length(a)
-  acc <- (-1)**d * (1 + sum(a))**(-1)
+genz2_int <- function(a, u) {
+  d = length(a)
+  normalizing = 1/ (factorial(d) * prod(a))
   
-  for (k in c(1:d)){
-    I_ <- combinations(n=d, r=k)
-    
-    for (j in c(1:length(I_))){
-      inner_sum <- (-1)**(k+d) * (1 + sum(a) - sum(a[I_[j,]]))**(-1)
-      acc <- acc + inner_sum
+  acc = 0 
+  acc <- acc + (-1)^d / (1 +  sum(a))
+  for (k in 1:d){
+    I_ = combinations(n=d, r=k)
+    for (j in 1:nrow(I_)){
+      acc <- acc + (-1)^(d+k) /  (1 +  sum(a) -  sum(a[I_[j,]]))
     }
-    return((1/(prod(a) * factorial(d))) * acc)
   }
+  return(normalizing * acc) 
 }
+
 
 ### discontinuous ###
 
@@ -79,28 +76,27 @@ genz4_int <- function(a, u){
 
 
 ### oscillatory ###
-
-genz5 <- function(a, x, u){
-  return(cos(2*pi*u[1] + sum(a*x)))
-}
-
-genz5_int <- function(a, u){
-  d <- length(a)
-  negative_sin <- function(x){-sin(x)}
-  negative_cos <- function(x){-cos(x)}
+genz5_int <- function(a, u) {
+  d = length(a)
+  if (d %% 4 == 1){h_d = function(x){sin(x)}}
+  if (d %% 4 == 2){h_d = function(x){-cos(x)}}
+  if (d %% 4 == 3){h_d = function(x){-sin(x)}}
+  if (d %% 4 == 0){h_d = function(x){cos(x)}}
   
-  f_list <- list(sin, negative_cos, negative_sin, cos)
-  chosen_f <- f_list[[d%%4 + 4*(d%%4==0)]]
-  
-  acc <- chosen_f(2*pi*u[1] + sum(a))
-  for (k in c(1:d)){
-    I_ <- combinations(n=d, r=k)
-    for (j in c(1:length(I_))){
-      inner_sum <- (-1)**(k) * chosen_f(2*pi*u[1] + sum(a) - sum(a[I_[j,]]))
-      acc <- acc + inner_sum}
+  normalizing = 1/prod(a) 
+  acc = 0 
+  acc <- acc + h_d(2*pi*u[1] + sum(a))
+  for (k in 1:d){
+    I_ = combinations(n=d, r=k)
+    for (j in 1:nrow(I_)){
+      acc <- acc + (-1)^k * h_d(2 * pi * u[1] + sum(a) - sum(a[I_[j,]]))
+    }
   }
-  return((1/prod(a))* acc)
+  return(normalizing * acc) 
 }
+
+
+
 
 
 ### product peak ###
