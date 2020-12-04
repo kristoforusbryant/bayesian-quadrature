@@ -51,6 +51,7 @@ intreegral <- function(vars, vals, d){
           moves$pop()
         }
         now = history$peek()
+        if (now < 0){break} # only one leaf 
         min_stacks[[now]]$push(max_stacks[[now]]$pop())
         
         moves$pop() # deleting the excess left node
@@ -124,6 +125,7 @@ intreegral_debug <- function(vars, vals, d){
           moves$pop()
         }
         now = history$peek()
+        if (now < 0){break}
         min_stacks[[now]]$push(max_stacks[[now]]$pop())
         
         moves$pop() # deleting the excess left node
