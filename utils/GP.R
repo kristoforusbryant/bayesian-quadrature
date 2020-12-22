@@ -10,19 +10,7 @@ kernel_rbf <- function(x,y, l=1){
 
 kernel_add <- function(x,y){sum(x+y)} # trivial for testing
 
-
 # Kernel multiplication
-#k_mult = function(X, X_, kernel){
-  # X and X_ are m x d and n x d matrices
-#  if (is.null(nrow(X))){ X = t(as.matrix(X))}
-#  if (is.null(nrow(X_))){ X_ = t(as.matrix(X_))}
-#  K = matrix(rep(0, len=nrow(X)*nrow(X_)), nrow = nrow(X))
-#  for (i in 1:nrow(X)){
-#    K[i,] = apply(X_, 1, function(a){kernel(X[i,],a)}) 
-#  }
-#  return(K)
-#}
-
 k_mult = function(X, X_, kernel, lengthscale){
   # X and X_ are m x d and n x d matrices
   if (is.null(nrow(X))){ X = t(as.matrix(X))}
@@ -96,7 +84,7 @@ GP <- setRefClass("GP",
         c = matrix(runif(S * d), ncol = d)
         m = apply(c, 1, function(x_){.self$cov(x_)} )
         c_ = t(as.matrix(c[which.max(m),]))
-        seq_update(c_, as.matrix(f(c_) + rnorm(n,0,sqrt(sigmasq))))
+        seq_update(c_, as.matrix(f(c_) + rnorm(1,0,sqrt(sigmasq))))
       }
     },
     GP_BQ = function(MI_iter=10000, min=0, max=1){

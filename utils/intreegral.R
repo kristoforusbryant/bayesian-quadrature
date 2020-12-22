@@ -35,6 +35,7 @@ intreegral <- function(vars, vals, d){
           prod(sapply(max_stacks, function(x){x$peek()}) -
                  sapply(min_stacks, function(x){x$peek()}))
         now = history$peek()
+        if (now < 0){break} # only one leaf 
         min_stacks[[now]]$push(max_stacks[[now]]$pop())
         left_empty = FALSE
         moves$pop()
@@ -107,6 +108,7 @@ intreegral_debug <- function(vars, vals, d){
           prod(sapply(max_stacks, function(x){x$peek()}) -
                  sapply(min_stacks, function(x){x$peek()}))
         now = history$peek()
+        if (now < 0){break} # only one leaf 
         min_stacks[[now]]$push(max_stacks[[now]]$pop())
         left_empty = FALSE
         moves$pop()
