@@ -1,0 +1,94 @@
+--
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(dbarts)
+source("utils/bart_int.r")
+source("utils/intreegral.R")
+source("utils/genz_functions.r")
+```
+
+# HYPERPARAMETERS
+```{r}
+d = 1
+N = 50*d 
+x = list()
+N_REPEATS = 1
+
+for (i in 1:N_REPEATS){
+  set.seed(i*47)
+  x[[i]] <- matrix(runif(N * d), ncol = d)
+} # N samples of d dimensions 
+u = rep(.5, d)
+MI_iter = 1e4
+sigmasq = .1 
+S = 5000 
+
+control = dbartsControl(verbose = FALSE, keepTrainingFits = TRUE, useQuantiles = FALSE,keepTrees = TRUE, n.samples = 1000,n.cuts = 100L, n.burn = 1000L, n.trees = 200L, n.chains = 4L,n.threads = guessNumCores(), n.thin = 5L, printEvery = 100L,printCutoffs = 0L, rngKind = "default", rngNormalKind = "default",updateState = TRUE)
+
+# d=1, S=5000, 20*d seq des -> 1 min x 7 functions x 10 runs = 2 hours 
+# d=10, S=100, 10*d seq des -> 3 mins x 7 functions x 3 runs = 1 hour 
+
+functions = list()
+functions[[1]] = genz1
+functions[[2]] = genz2
+functions[[3]] = genz3
+functions[[4]] = genz4
+functions[[5]] = genz5
+functions[[6]] = genz6
+functions[[7]] = step
+
+results = list()
+```
+
+
+```{r}
+for (f_i in 1:length(functions)){
+  results[[f_i]] <- list()
+  for (i in 1:N_REPEATS){
+    results[[f_i]][[i]] <- list()
+    a = rep(150/(d^3), d)
+    y = apply(x[[i]], 1, function(x_){functions[[f_i]](a, x_, u)}) 
+    y_ = (y - mean(y)) / max(abs(y)) / 2
+    
+    BI_obj <- BART_INT$new(d = d, integrand=function(x_){functions[[f_i]](a, x_, u)}, control = control)
+    
+    ptm <- proc.time()
+    BI_obj$run(x[[i]], y_)
+    BI_obj$seq_design(n_of_pts=20*d, S) 
+    print('BART-INT Seq Design')
+    print(proc.time() - ptm)
+     
+    if (d == 1){
+      testpoints = matrix(runif(N*d), ncol = d)
+      plot(x[[i]], y_, col='blue')
+      points(testpoints,BI_obj$mean(testpoints), col='red')
+    }
+    
+    ptm <- proc.time()
+    integral <- BI_obj$bart_int()
+    integral$E = integral$E * 2 * max(abs(y - mean(y))) + mean(y)
+    integral$V = integral$V * ((2 * max(abs(y - mean(y)))) ** 2)
+    results[[f_i]][[i]] <- integral  
+    
+    print(results[[f_i]])
+    print('Integral inference ... ')
+    print(proc.time() - ptm)
+  }  
+}
+
+```
+
+# SAVE RESULTS
+```{r}
+filename = paste(c("results/Experiment_BART-INT_D", d,
+                         "_N",N,".RData"), collapse="")
+save(results, file = filename)
+```
+
+
+
+
+
