@@ -31,9 +31,8 @@ intreegral <- function(vars, vals, d){
     }
     else{
       if (left_empty){
-        integral <- integral + vals[i] * 
-          prod(sapply(max_stacks, function(x){x$peek()}) -
-                 sapply(min_stacks, function(x){x$peek()}))
+        integral <- integral + vals[i] * prod(sapply(max_stacks, function(x){x$peek()}) -
+                                          sapply(min_stacks, function(x){x$peek()}))
         now = history$peek()
         if (now < 0){break} # only one leaf 
         min_stacks[[now]]$push(max_stacks[[now]]$pop())
@@ -42,9 +41,8 @@ intreegral <- function(vars, vals, d){
         moves$push(1)
       }
       else{
-        integral <- integral + vals[i] * 
-          prod(sapply(max_stacks, function(x){x$peek()}) -
-                 sapply(min_stacks, function(x){x$peek()}))
+        integral <- integral + vals[i] * prod(sapply(max_stacks, function(x){x$peek()}) -
+                                          sapply(min_stacks, function(x){x$peek()}))
         if (i == length(vars)){break}
         while(moves$peek()){
           hist_pop = history$pop()
@@ -104,9 +102,8 @@ intreegral_debug <- function(vars, vals, d){
     else{
       if (left_empty){
         print("---CALCULATING INTEGRAL: LEFT EMPTY---")
-        integral <- integral + vals[i] * 
-          prod(sapply(max_stacks, function(x){x$peek()}) -
-                 sapply(min_stacks, function(x){x$peek()}))
+        integral <- integral + vals[i] * prod(sapply(max_stacks, function(x){x$peek()}) -
+                                          sapply(min_stacks, function(x){x$peek()}))
         now = history$peek()
         if (now < 0){break} # only one leaf 
         min_stacks[[now]]$push(max_stacks[[now]]$pop())
@@ -116,9 +113,8 @@ intreegral_debug <- function(vars, vals, d){
       }
       else{
         print("---CALCULATING INTEGRAL: LEFT NOT EMPTY---")
-        integral <- integral + vals[i] * 
-          prod(sapply(max_stacks, function(x){x$peek()}) -
-                 sapply(min_stacks, function(x){x$peek()}))
+        integral <- integral + vals[i] * prod(sapply(max_stacks, function(x){x$peek()}) -
+                             sapply(min_stacks, function(x){x$peek()}))
         if (i == length(vars)){break}
         while(moves$peek()){
           hist_pop = history$pop()

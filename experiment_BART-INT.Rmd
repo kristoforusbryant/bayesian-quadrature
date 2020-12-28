@@ -22,11 +22,9 @@ for (i in 1:N_REPEATS){
   x[[i]] <- matrix(runif(N * d), ncol = d)
 } # N samples of d dimensions 
 u = rep(.5, d)
-MI_iter = 1e4
-sigmasq = .1 
-S = 5000 
+S = 100 
 
-control = dbartsControl(verbose = FALSE, keepTrainingFits = TRUE, useQuantiles = FALSE,keepTrees = TRUE, n.samples = 1000,n.cuts = 100L, n.burn = 1000L, n.trees = 200L, n.chains = 4L,n.threads = guessNumCores(), n.thin = 5L, printEvery = 100L,printCutoffs = 0L, rngKind = "default", rngNormalKind = "default",updateState = TRUE)
+control = dbartsControl(verbose = FALSE, keepTrainingFits = TRUE, useQuantiles = FALSE, keepTrees = TRUE, n.samples = 200L,n.cuts = 100L, n.burn = 2000L, n.trees = 20L, n.chains = 4L,n.threads = guessNumCores(), n.thin = 5L, printEvery = 100L,printCutoffs = 0L, rngKind = "default", rngNormalKind = "default",updateState = TRUE)
 
 # d=1, S=5000, 20*d seq des -> 1 min x 7 functions x 10 runs = 2 hours 
 # d=10, S=100, 10*d seq des -> 3 mins x 7 functions x 3 runs = 1 hour 
@@ -40,8 +38,24 @@ functions[[5]] = genz5
 functions[[6]] = genz6
 functions[[7]] = step
 
+a_list = list() 
+a_list[[1]] = rep(150/(d^3), d)
+a_list[[2]] = rep(600/(d^3), d)
+a_list[[3]] = rep(10/(d^3), d)
+a_list[[4]] = rep(100/(d^2), d)
+a_list[[5]] = rep(110/(d^(5/2)), d)
+a_list[[6]] = rep(600/(d^3), d)
+a_list[[7]] = rep(0, d)
+
 results = list()
+
+filename = paste(c("results/Experiment_BART-INT_D", d,
+                         "_N",N,".RData"), collapse="")
+
+rescale = function(y){(y - mean(y)) / max(abs(y - base::mean(y))) / 2}
+rescale = function(y){(y - min(y)) / (max(y) - min(y)) - .5}
 ```
+
 
 
 ```{r}
@@ -49,46 +63,49 @@ for (f_i in 1:length(functions)){
   results[[f_i]] <- list()
   for (i in 1:N_REPEATS){
     results[[f_i]][[i]] <- list()
-    a = rep(150/(d^3), d)
+    
+    # True Response Value 
+    a = a_list[[f_i]]
     y = apply(x[[i]], 1, function(x_){functions[[f_i]](a, x_, u)}) 
-    y_ = (y - mean(y)) / max(abs(y)) / 2
+    y_ = rescale(y)
     
     BI_obj <- BART_INT$new(d = d, integrand=function(x_){functions[[f_i]](a, x_, u)}, control = control)
     
+    # Running Sequential Design
     ptm <- proc.time()
-    BI_obj$run(x[[i]], y_)
+    BI_obj$run(x[[i]], y)
     BI_obj$seq_design(n_of_pts=20*d, S) 
-    print('BART-INT Seq Design')
-    print(proc.time() - ptm)
-     
+    #print('BART-INT Seq Design')
+    #print(proc.time() - ptm)
+    
+    # Plotting for Checks 
     if (d == 1){
-      testpoints = matrix(runif(N*d), ncol = d)
-      plot(x[[i]], y_, col='blue')
-      points(testpoints,BI_obj$mean(testpoints), col='red')
+      testpoints = as.matrix(1:100 / 100)
+      plot(testpoints,BI_obj$mean(testpoints), col='red')
+      points(x[[i]], y, col='blue')
+      #plot(x[[i]], y, col='blue')
+      #points(testpoints,BI_obj$mean(testpoints), col='red')
     }
     
+    # Computing Integral
     ptm <- proc.time()
     integral <- BI_obj$bart_int()
-    integral$E = integral$E * 2 * max(abs(y - mean(y))) + mean(y)
-    integral$V = integral$V * ((2 * max(abs(y - mean(y)))) ** 2)
+    integral$E = integral$E 
+    integral$V = integral$V 
+    integral$time = proc.time() - ptm
     results[[f_i]][[i]] <- integral  
     
-    print(results[[f_i]])
-    print('Integral inference ... ')
-    print(proc.time() - ptm)
-  }  
+    #print(results[[f_i]][[i]])
+    #print('Integral inference ... ')
+    #print(proc.time() - ptm)
+    
+    print(c(results[[f_i]][[i]]$E, results[[f_i]][[i]]$V))
+    
+    # Saving Results
+    save(results, file = filename)
+    }  
 }
-
 ```
-
-# SAVE RESULTS
-```{r}
-filename = paste(c("results/Experiment_BART-INT_D", d,
-                         "_N",N,".RData"), collapse="")
-save(results, file = filename)
-```
-
-
 
 
 
