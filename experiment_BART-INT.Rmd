@@ -6,7 +6,6 @@ output: html_notebook
 ```{r}
 library(dbarts)
 source("utils/bart_int.r")
-source("utils/intreegral.R")
 source("utils/genz_functions.r")
 ```
 
@@ -52,7 +51,6 @@ results = list()
 filename = paste(c("results/Experiment_BART-INT_D", d,
                          "_N",N,".RData"), collapse="")
 
-rescale = function(y){(y - mean(y)) / max(abs(y - base::mean(y))) / 2}
 rescale = function(y){(y - min(y)) / (max(y) - min(y)) - .5}
 ```
 
@@ -99,7 +97,21 @@ for (f_i in 1:length(functions)){
     #print('Integral inference ... ')
     #print(proc.time() - ptm)
     
-    print(c(results[[f_i]][[i]]$E, results[[f_i]][[i]]$V))
+    print(c(results[[f_i]][[i]]$E, results[[f_i]][[i]]$V, results[[f_i]][[i]]$time))
+
+    # Computing Integral
+    ptm <- proc.time()
+    integral <- BI_obj$bart_int_shrub()
+    integral$E = integral$E 
+    integral$V = integral$V 
+    integral$time = proc.time() - ptm
+    results[[f_i]][[i]] <- integral  
+    
+    #print(results[[f_i]][[i]])
+    #print('Integral inference ... ')
+    #print(proc.time() - ptm)
+    
+    print(c(results[[f_i]][[i]]$E, results[[f_i]][[i]]$V, results[[f_i]][[i]]$time))
     
     # Saving Results
     save(results, file = filename)
